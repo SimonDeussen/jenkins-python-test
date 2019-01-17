@@ -1,23 +1,44 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying'
-            }
-        }
+     triggers {
+        pollSCM('*/5 * * * 1-5')
     }
+    options {
+        skipDefaultCheckout(true)
+        // Keep the 10 most recent builds
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+    }
+    enviroment {
+        WORKON_HOME=$HOME/.virtualenvs
+        PROJECT_HOME=$HOME/Devel
+        PATH = /usr/local/lib/python3.7/site-packages:$PATH
+    }
+    stages {
+
+        stage ("Code pull"){
+            steps{
+                checkout scm
+            }
+        }
+        stage('Build environment') {
+            steps {
+                sh '''mkvirtualenv ${BUILD_TAG}
+                      workon ${BUILD_TAG} 
+                      pip3 install -r requirements.txt
+                    '''
+            }
+        }
+        stage('Test environment') {
+            steps {
+                sh '''source activate ${BUILD_TAG} 
+                      pip3 list
+                      which pip3
+                      which python3
+                    '''
+            }
+        }
     post {
         always {
             echo 'This will always run'
