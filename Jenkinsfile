@@ -11,8 +11,8 @@ pipeline {
         timestamps()
     }
     enviroment {
-        WORKON_HOME=$HOME/.virtualenvs
-        PROJECT_HOME=$HOME/Devel
+        WORKON_HOME= /Users/sdeussen/.virtualenvs
+        PROJECT_HOME= /Users/sdeussen/Devel
         PATH = /usr/local/lib/python3.7/site-packages:$PATH
     }
     stages {
