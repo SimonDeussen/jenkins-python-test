@@ -5,7 +5,7 @@ pipeline {
         pollSCM('*/2 * * * 1-5')
     }
     options {
-        skipDefaultCheckout(true)
+        //skipDefaultCheckout(true)
         // Keep the 10 most recent builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
