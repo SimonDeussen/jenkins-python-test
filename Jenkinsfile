@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('*/5 * * * 1-5')
+        pollSCM('*/2 * * * 1-5')
     }
 
     options {
@@ -13,7 +13,7 @@ pipeline {
     }
 
     environment {
-      PATH="/var/lib/jenkins/miniconda3/bin:$PATH"
+      PATH="/Users/Shared/Jenkins/miniconda3/bin:$PATH"
     }
 
     stages {
