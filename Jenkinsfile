@@ -6,7 +6,7 @@ pipeline {
     }
 
     options {
-        skipDefaultCheckout(false)
+        skipDefaultCheckout(true)
         // Keep the 10 most recent builds
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
@@ -70,6 +70,8 @@ pipeline {
             }
         }
 
+
+
         stage('Unit tests') {
             steps {
                 sh  ''' source activate ${BUILD_TAG}
@@ -79,25 +81,24 @@ pipeline {
             post {
                 always {
                     // Archive unit tests for the future
-                    junit (allowEmptyResults: true,
-                          testResults: './reports/unit_tests.xml',
-                          fingerprint: true)
+                    junit allowEmptyResults: true, testResults: 'reports/unit_tests.xml'
                 }
             }
         }
 
-        stage('Integration tests') {
+        stage('Acceptance tests') {
             steps {
                 sh  ''' source activate ${BUILD_TAG}
-                        behave -f=formatters.cucumber_json:PrettyCucumberJSONFormatter -o ./reports/integration.json
+                        behave -f=formatters.cucumber_json:PrettyCucumberJSONFormatter -o ./reports/acceptance.json || true
                     '''
             }
             post {
                 always {
-                    cucumber (fileIncludePattern: '**/*.json',
-                              jsonReportDirectory: './reports/',
-                              parallelTesting: true,
-                              sortingMethod: 'ALPHABETICAL')
+                    cucumber (buildStatus: 'SUCCESS',
+                    fileIncludePattern: '**/*.json',
+                    jsonReportDirectory: './reports/',
+                    parallelTesting: true,
+                    sortingMethod: 'ALPHABETICAL')
                 }
             }
         }
@@ -110,25 +111,23 @@ pipeline {
             }
             steps {
                 sh  ''' source activate ${BUILD_TAG}
-                        python setup.py bdist_wheel  
+                        python setup.py bdist_wheel
                     '''
             }
             post {
                 always {
                     // Archive unit tests for the future
-                    archiveArtifacts (allowEmptyArchive: true,
-                                     artifacts: 'dist/*whl',
-                                     fingerprint: true)
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'dist/*whl', fingerprint: true
                 }
             }
         }
 
-        stage("Deploy to PyPI") {
-            }
-            steps {
-                sh "twine upload dist/*"
-            }
-        }
+        // stage("Deploy to PyPI") {
+        //     steps {
+        //         sh """twine upload dist/*
+        //         """
+        //     }
+        // }
     }
 
     post {
@@ -140,8 +139,7 @@ pipeline {
                 subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
                          <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-            )
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']])
         }
     }
 }
