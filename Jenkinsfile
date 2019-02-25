@@ -1,9 +1,5 @@
 pipeline {
-    agent { 
-        docker {
-            label: "ssh-test"
-        }
-    }
+    agent any
 
     triggers {
         pollSCM('*/2 * * * 1-5')
