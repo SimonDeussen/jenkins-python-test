@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label: "ssh-test"}
 
     triggers {
         pollSCM('*/2 * * * 1-5')
@@ -101,7 +101,7 @@ pipeline {
         //             sortingMethod: 'ALPHABETICAL')
         //         }
         //     }
-        // }
+        // }π
 
         stage('Build package') {
             when {
