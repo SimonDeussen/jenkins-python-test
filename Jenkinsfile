@@ -1,6 +1,4 @@
 pipeline {
-    agent any
-
     agent { label 'ssh-test' }
 
     triggers {
